@@ -20,6 +20,15 @@ namespace FunctionApp1
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Sessions")] HttpRequest req,
             ILogger log)
         {
+            Session session = new Session()
+            {
+                Id = Guid.NewGuid(),
+                Description = "Default description",
+                Title = "Default itle",
+                Duration = 75
+            };
+
+            SessionStore.Add(session);
 
             return new OkObjectResult(SessionStore);
         }
