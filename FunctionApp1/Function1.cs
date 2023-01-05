@@ -8,15 +8,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace FunctionApp1
 {
     public static class Function1
     {
-        public static List<Session> SessionStore = new List<Session>();
+        //public static List<Session> SessionStore = new List<Session>();
 
         [FunctionName("Sessionize")]
-        public static IActionResult Sessions(
+        public static async Task<IActionResult> Sessions(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Sessions")] HttpRequest req,
             ILogger log)
         {
@@ -28,9 +29,13 @@ namespace FunctionApp1
                 Duration = 75
             };
 
-            SessionStore.Add(session);
+            using (var context = new DataContext())
+            {
+                var sessions = await context.Sessions.ToListAsync();
 
-            return new OkObjectResult(SessionStore);
+                return new OkObjectResult(sessions);
+            }
+            
         }
 
         [FunctionName("Create")]
@@ -42,9 +47,14 @@ namespace FunctionApp1
             Session data = JsonConvert.DeserializeObject<Session>(requestBody);
 
             data.Id = Guid.NewGuid();
-            SessionStore.Add(data);
 
-            return new OkObjectResult(data);
+
+            using (var context = new DataContext())
+            {
+                context.Sessions.Add(data);
+                await context.SaveChangesAsync();
+                return new OkObjectResult(data);
+            }
         }
     }
 }
