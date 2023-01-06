@@ -14,20 +14,11 @@ namespace FunctionApp1
 {
     public static class Function1
     {
-        //public static List<Session> SessionStore = new List<Session>();
-
         [FunctionName("Sessionize")]
         public static async Task<IActionResult> Sessions(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Sessions")] HttpRequest req,
             ILogger log)
         {
-            Session session = new Session()
-            {
-                Id = Guid.NewGuid(),
-                Description = "Default description",
-                Title = "Default itle",
-                Duration = 75
-            };
 
             using (var context = new DataContext())
             {
